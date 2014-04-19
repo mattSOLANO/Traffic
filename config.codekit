@@ -8331,15 +8331,6 @@
 		"outputPathIsSetByUser": 0,
 		"processed": 0
 		},
-	"\/index.html": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/index.html",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
 	"\/lightSprite.png": {
 		"fileType": 32768,
 		"ignore": 0,
@@ -8369,6 +8360,17 @@
 		"initialSize": 151,
 		"inputAbbreviatedPath": "\/red.png",
 		"outputAbbreviatedPath": "\/red.png",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0,
+		"processed": 0
+		},
+	"\/stopLine.png": {
+		"fileType": 32768,
+		"ignore": 0,
+		"ignoreWasSetByUser": 0,
+		"initialSize": 117,
+		"inputAbbreviatedPath": "\/stopLine.png",
+		"outputAbbreviatedPath": "\/stopLine.png",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0,
 		"processed": 0
