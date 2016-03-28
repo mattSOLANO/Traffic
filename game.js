@@ -5,6 +5,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload: p
 
 function preload(){
   game.load.image('car', 'car.png');
+  game.load.image('carVert', 'car_vert.png');
   game.load.image('stopLine', 'stopLine.png');
   game.load.image('green', 'green.png');
   game.load.spritesheet('light', 'lightSprite.png', 20,20, 2);
@@ -13,12 +14,13 @@ function preload(){
 
 
 
-var car;
-var car2;
 var smartGroup;
-//var smartCar;
+var smartGroup2;
 var stopLine;
 var light;
+var style = { font: "20px Arial", fill: "#373737", align: "center" };
+var theScore = 0;
+var text;
 
 function create(){
 
@@ -28,113 +30,113 @@ function create(){
 
   game.stage.smoothed = false;
 
-  car = game.add.sprite(100, 200, 'car');
-  game.physics.arcade.enable(car);
-
-  car2 = game.add.sprite(0, 200, 'car');
-  game.physics.arcade.enable(car2);
-
-  car.body.velocity.set(100, 0);
-
-  car2.body.velocity.set(100, 0);
-
-
   smartGroup = game.add.group();
+  smartGroup2 = game.add.group();
 
-  var numberofCars = 4;
+  game.time.events.loop(game.rnd.integerInRange(2000, 3000), newCar, this);
 
-  //var smartCar01 = smartGroup.create(game.world.randomX, 400, 'green');
-
-  for(var i = 0; i < numberofCars; i++){
-    var smartCar = smartGroup.create(100 *(i + 1), 400, 'car');
-    game.physics.arcade.enable(smartCar);
-    smartCar.body.velocity.set(75, 0);
-    
-  } 
-
-
-
+  game.time.events.loop(game.rnd.integerInRange(2000, 3000), newCar2, this);
   
 
   stopLine = game.add.sprite(500, 200, 'stopLine');
 
   light =  game.add.button(550, 200, 'light', changeLight, this, 0, 0, 0);
-   // button.name = '0';
+
+  text = game.add.text(700, 25, theScore, style);
 
 }
 
 var lightState = "stop";
 
+
+
 function update(){
 
-  var distanceFromLight = stopLine.x - car.x;
-
-
-  if ( distanceFromLight < 150 && distanceFromLight > 38) {
-    if (lightState == "stop"){
-      var approachVel = (((stopLine.x - car.x)/100) * 100) - 38;
-      car.body.velocity.set(approachVel, 0);
-    }
-    else if (lightState == "go") {
-      car.body.velocity.set(100, 0);
-    }
-  }
-
-
-  var distanceFromCar = car.x - car2.x;
   
 
-  if ( distanceFromCar < 100 && distanceFromCar > 38) {
-    var followVel = (((car.x - car2.x)/100) * 100) - 38;
-    car2.body.velocity.set(followVel, 0);
-  }
 
-  else if ( distanceFromCar >= 100){
-    car2.body.velocity.set(100, 0);
-  }
-
-
-
-  smartGroup.forEach(function(Car){
-
-    Car.events.onOutOfBounds.add( goodbye, this );
+  smartGroup.forEachAlive(function(Car){
 
     var distanceFromStopLine = stopLine.x - Car.x;
-    //console.log(distanceFromStopLine);
 
-    if (distanceFromStopLine > 40 ){
+    if (distanceFromStopLine > 40 || distanceFromStopLine < 0){
 
-      smartGroup.forEach(function(Enemy){
+      smartGroup.forEachAlive(function(Enemy){
 
         var distanceFromEnemy = game.physics.arcade.distanceBetween(Car, Enemy);
-        //console.log(distanceFromEnemy);
 
-
-        // if (Enemy.x > Car.x && distanceFromEnemy < 60 && distanceFromEnemy > 0 ){
-        //   var followVel = (((Enemy.x - Car.x)/30) * 40)- 40;
+        // if (Enemy.x > Car.x && distanceFromEnemy < 70 && distanceFromEnemy > 0 ){
+        //   var followVel = (((Enemy.x - Car.x)/70) * 100)- 60;
         //   Car.body.velocity.set(followVel, 0);
         // }
 
-        if (Enemy.x > Car.x && distanceFromEnemy < 100 && distanceFromEnemy > 0 ){
-          var followVel = (((Enemy.x - Car.x)/100) * 100)- 50;
+        if (Enemy.x > Car.x && distanceFromEnemy <= 70 && distanceFromEnemy > 0 ){
+          var followVel = (((distanceFromEnemy-40)/100) * Car.speed);
           Car.body.velocity.set(followVel, 0);
+        }
+        else if (Enemy.x > Car.x && distanceFromEnemy > 70) {
+          Car.body.velocity.set(Car.speed, 0);
         }
 
       });
 
-    } else if ( distanceFromStopLine <= 40 && distanceFromStopLine > 10){
+    } else if ( distanceFromStopLine <= 70 && distanceFromStopLine > 0){
+
 
       if (lightState == "stop"){
-        var approachVel = (((stopLine.x - Car.x)/100) * 100) - 38;
+        // var approachVel = (((stopLine.x - Car.x)/100) * Car.speed) - 38;
+        // Car.body.velocity.set(approachVel, 0);
+        var approachVel = (((distanceFromStopLine-40)/100) * Car.speed);
         Car.body.velocity.set(approachVel, 0);
       }
       else if (lightState == "go") {
-        Car.body.velocity.set(100, 0);
+        Car.body.velocity.set(Car.speed, 0);
       }
 
     }
-    //var
-    //console.log(distanceFromLight);
+
+  });
+
+
+
+  smartGroup2.forEachAlive(function(Car){
+
+    var distanceFromStopLine = stopLine.y - Car.y;
+
+
+    if (distanceFromStopLine > 40 || distanceFromStopLine < 0){
+
+      smartGroup2.forEachAlive(function(Enemy){
+
+        var distanceFromEnemy = game.physics.arcade.distanceBetween(Car, Enemy);
+
+        if (Enemy.y > Car.y && distanceFromEnemy <= 70 && distanceFromEnemy > 0 ){
+
+          var followVel = (((distanceFromEnemy-40)/70) * Car.speed);
+
+          Car.body.velocity.set(0, followVel);
+        }
+        else if (Enemy.y > Car.y && distanceFromEnemy > 70) {
+          Car.body.velocity.set(0, Car.speed);
+        }
+
+      });
+
+    } else if ( distanceFromStopLine <= 70 && distanceFromStopLine > 0){
+
+
+      if (lightState == "go"){
+        // var approachVel = (((stopLine.x - Car.x)/100) * Car.speed) - 38;
+        // Car.body.velocity.set(approachVel, 0);
+        var approachVel = (((distanceFromStopLine-40)/100) * Car.speed);
+        Car.body.velocity.set(0, approachVel);
+      }
+      else if (lightState == "stop") {
+        Car.body.velocity.set(0, Car.speed);
+      }
+
+    }
+
   });
 
 
@@ -157,8 +159,36 @@ function changeLight () {
 
 
 function goodbye(obj) {
-  console.log('adios');
-  //obj.destroy();
+  theScore++;
+  text.setText(theScore);
+}
+
+
+function newCar(){
+    var smartCar = smartGroup.create(0, 200, 'car');
+    var carSpeed = game.rnd.integerInRange(100, 200);
+    game.physics.arcade.enable(smartCar);
+    smartCar.anchor.setTo(0.5, 0.5);
+    smartCar.checkWorldBounds = true;
+    smartCar.outOfBoundsKill = true;
+    smartCar.speed = carSpeed;
+    smartCar.body.velocity.set(carSpeed, 0);
+    smartCar.events.onOutOfBounds.add( goodbye, this );
+
+}
+
+
+function newCar2(){
+    var smartCar = smartGroup2.create(550, 0, 'carVert');
+    var carSpeed = game.rnd.integerInRange(100, 200);
+    game.physics.arcade.enable(smartCar);
+    smartCar.anchor.setTo(0.5, 0.5);
+    smartCar.checkWorldBounds = true;
+    smartCar.outOfBoundsKill = true;
+    smartCar.speed = carSpeed;
+    smartCar.body.velocity.set(0, carSpeed);
+    smartCar.events.onOutOfBounds.add( goodbye, this );
+
 }
 
 
