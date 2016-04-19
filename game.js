@@ -22,7 +22,7 @@ var intersections = [
   {x: 300, y: 300},
   {x: 600, y: 300}
 ];
-var directions = ['right'];
+var directions = ['right', 'down'];
 var carCollisionGroup;
 
 function create(){
@@ -41,58 +41,78 @@ function create(){
 
   game.time.events.loop(game.rnd.integerInRange(1000, 1500), createSmartCar, this);
 
+  lightGroup = game.add.group();
+  lightGroup.enableBody = true;
+
   intersections.forEach(function(intersection){
-    game.add.button(intersection.x, intersection.y, 'light', changeLight, this, 0, 0, 0);
+    var newLight = game.make.button(intersection.x, intersection.y, 'light', changeLight, this, 0, 0, 0);
+    newLight.lightState = 'red';
+    lightGroup.add(newLight);
   });
 
   text = game.add.text(700, 25, theScore, style);
 
 }
 
-var lightState = "stop";
-
 function update(){
 
-   smartGroup.forEachAlive(function(Car){
+
+   smartGroup.forEachAlive( function(Car) {
   //
   //   var distanceFromStopLine = stopLine.x - Car.x;
   //
   //   if (distanceFromStopLine > 40 || distanceFromStopLine < 0){
   //
-
-       smartGroup.forEachAlive(function(Enemy){
-          if(Enemy.direction === Car.direction) {
-            var distanceFromEnemy = game.physics.arcade.distanceBetween(Car, Enemy);
-            if (Car.direction === 'right') {
-              // if (Enemy.x > Car.x && distanceFromEnemy < 70 && distanceFromEnemy > 0 ){
-              //   var followVel = (((Enemy.x - Car.x)/70) * 100)- 60;
-              //   Car.body.velocity.x = followVel;
-              // }
-              if (Enemy.x > Car.x && distanceFromEnemy <= 70 && distanceFromEnemy > 0 ){
-                var followVel = (((distanceFromEnemy-40)/100) * Car.speed);
-                Car.body.velocity.x = followVel;
-              }
-              else if (Enemy.x > Car.x && distanceFromEnemy > 70) {
-                Car.body.velocity.x = Car.speed;
-              }
-            }
-            else if (Car.direction === 'down') {
-              if (Enemy.y > Car.y && distanceFromEnemy < 70 && distanceFromEnemy > 0 ){
-                var followVel = (((Enemy.y - Car.y)/70) * 100)- 60;
-                Car.body.velocity.y = followVel;
-              }
-              else if (Enemy.y > Car.y && distanceFromEnemy <= 70 && distanceFromEnemy > 0 ){
-                var followVel = (((distanceFromEnemy-40)/100) * Car.speed);
-                Car.body.velocity.y = followVel;
-              }
-              else if (Enemy.y > Car.y && distanceFromEnemy > 70) {
-                Car.body.velocity.y = Car.speed;
-              }
-            }
-
+      lightGroup.forEachAlive( function(Light) {
+          var distanceFromLight;
+          if (Car.direction === 'right' && Car.y === Light.y) {
+              distanceFromLight = Light.x - Car.x;
+          }
+          else if (Car.direction === 'down' && Car.x === Light.x) {
+              distanceFromLight = Light.y - Car.y;
           }
 
-       });
+          if (distanceFromLight > 40 || distanceFromLight < 0) {
+              smartGroup.forEachAlive( function(Enemy) {
+                 if(Enemy.direction === Car.direction) {
+                   var distanceFromEnemy = game.physics.arcade.distanceBetween(Car, Enemy);
+                   if (Car.direction === 'right') {
+                     if (Enemy.x > Car.x && distanceFromEnemy <= 70 && distanceFromEnemy > 0 ){
+                       var followVel = (((distanceFromEnemy-40)/35) * Car.speed);
+                       Car.body.velocity.x = followVel;
+                     }
+                     else if (Enemy.x > Car.x && distanceFromEnemy > 70) {
+                       Car.body.velocity.x = Car.speed;
+                     }
+                   }
+                   else if (Car.direction === 'down') {
+                     if (Enemy.y > Car.y && distanceFromEnemy <= 70 && distanceFromEnemy > 0 ){
+                       var followVel = (((distanceFromEnemy-40)/35) * Car.speed);
+                       Car.body.velocity.y = followVel;
+                     }
+                     else if (Enemy.y > Car.y && distanceFromEnemy > 70) {
+                       Car.body.velocity.y = Car.speed;
+                     }
+                   }
+
+                 }
+
+              });
+          }
+          else if (distanceFromLight <= 70 && distanceFromLight > 0) {
+            var approachVel = (((distanceFromLight-40)/100) * Car.speed);
+            if (Car.direction === 'right') {
+                Car.body.velocity.x = approachVel;
+            }
+            else if (Car.direction === 'down') {
+                Car.body.velocity.y = approachVel;
+            }
+          }
+
+      });
+
+
+
   //
   //   } else if ( distanceFromStopLine <= 70 && distanceFromStopLine > 0){
   //
@@ -113,14 +133,15 @@ function update(){
 
 }
 
-function changeLight () {
-    if (lightState == "stop"){
-      lightState = "go";
-      this.setFrames(1, 1, 1);
+function changeLight (light) {
+    console.log(light.lightState);
+    if (light.lightState === "stop"){
+      light.lightState = "go";
+      light.setFrames(1, 1, 1);
     }
-    else if (lightState == "go") {
-      lightState = "stop";
-      this.setFrames(0, 0, 0);
+    else if (light.lightState === "go") {
+      light.lightState = "stop";
+      light.setFrames(0, 0, 0);
     }
 }
 
@@ -154,7 +175,7 @@ function setSpawnPoint(direction) {
 };
 
 function setSpeed() {
-  return game.rnd.integerInRange(100, 300);
+  return game.rnd.integerInRange(100, 240);
 };
 
 function smartCar(spawnPoint, direction, speed) {
@@ -178,6 +199,7 @@ function smartCar(spawnPoint, direction, speed) {
   }
   smartCar.body.setCollisionGroup(carCollisionGroup);
   smartCar.body.collides(carCollisionGroup, hitCar, this);
+  smartCar.body.createBodyCallback(carCollisionGroup, hitCar, this);
   smartCar.events.onOutOfBounds.add( goodbye, this );
 };
 
@@ -189,5 +211,5 @@ function createSmartCar() {
 };
 
 function hitCar() {
-  console.log(carHit);
+  console.log('carHit');
 };
