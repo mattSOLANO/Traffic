@@ -22,7 +22,7 @@ var intersections = [
   {x: 300, y: 300},
   {x: 600, y: 300}
 ];
-var directions = ['down', 'right'];
+var directions = ['right'];
 var carCollisionGroup;
 
 function create(){
@@ -64,11 +64,11 @@ function update(){
           if(Enemy.direction === Car.direction) {
             var distanceFromEnemy = game.physics.arcade.distanceBetween(Car, Enemy);
             if (Car.direction === 'right') {
-              if (Enemy.x > Car.x && distanceFromEnemy < 70 && distanceFromEnemy > 0 ){
-                var followVel = (((Enemy.x - Car.x)/70) * 100)- 60;
-                Car.body.velocity.x = followVel;
-              }
-              else if (Enemy.x > Car.x && distanceFromEnemy <= 70 && distanceFromEnemy > 0 ){
+              // if (Enemy.x > Car.x && distanceFromEnemy < 70 && distanceFromEnemy > 0 ){
+              //   var followVel = (((Enemy.x - Car.x)/70) * 100)- 60;
+              //   Car.body.velocity.x = followVel;
+              // }
+              if (Enemy.x > Car.x && distanceFromEnemy <= 70 && distanceFromEnemy > 0 ){
                 var followVel = (((distanceFromEnemy-40)/100) * Car.speed);
                 Car.body.velocity.x = followVel;
               }
@@ -91,7 +91,7 @@ function update(){
             }
 
           }
-          
+
        });
   //
   //   } else if ( distanceFromStopLine <= 70 && distanceFromStopLine > 0){
