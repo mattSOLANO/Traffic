@@ -1,7 +1,4 @@
-
-
 var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload: preload, create: create, update: update });
-
 
 function preload(){
   game.load.image('car', 'car.png');
@@ -56,13 +53,8 @@ function create(){
 
 function update(){
 
-
    smartGroup.forEachAlive( function(Car) {
-  //
-  //   var distanceFromStopLine = stopLine.x - Car.x;
-  //
-  //   if (distanceFromStopLine > 40 || distanceFromStopLine < 0){
-  //
+
       lightGroup.forEachAlive( function(Light) {
           var distanceFromLight;
           if (Car.direction === 'right' && Car.y === Light.y) {
@@ -100,47 +92,40 @@ function update(){
               });
           }
           else if (distanceFromLight <= 70 && distanceFromLight > 0) {
-            var approachVel = (((distanceFromLight-40)/100) * Car.speed);
             if (Car.direction === 'right') {
+              if (Light.lightState == "red") {
+                var approachVel = (((distanceFromLight-40)/100) * Car.speed);
                 Car.body.velocity.x = approachVel;
+              }
+              else if (Light.lightState == "green") {
+                Car.body.velocity.x = Car.speed;
+              }
             }
             else if (Car.direction === 'down') {
+              if (Light.lightState == "green") {
+                var approachVel = (((distanceFromLight-40)/100) * Car.speed);
                 Car.body.velocity.y = approachVel;
+              }
+              else if (Light.lightState == "red") {
+                Car.body.velocity.y = Car.speed;
+              }
             }
           }
 
       });
 
-
-
-  //
-  //   } else if ( distanceFromStopLine <= 70 && distanceFromStopLine > 0){
-  //
-  //
-  //     if (lightState == "stop"){
-  //       // var approachVel = (((stopLine.x - Car.x)/100) * Car.speed) - 38;
-  //       // Car.body.velocity.set(approachVel, 0);
-  //       var approachVel = (((distanceFromStopLine-40)/100) * Car.speed);
-  //       Car.body.velocity.set(approachVel, 0);
-  //     }
-  //     else if (lightState == "go") {
-  //       Car.body.velocity.set(Car.speed, 0);
-  //     }
-  //
-  //   }
-  //
   });
 
 }
 
 function changeLight (light) {
     console.log(light.lightState);
-    if (light.lightState === "stop"){
-      light.lightState = "go";
+    if (light.lightState === "red"){
+      light.lightState = "green";
       light.setFrames(1, 1, 1);
     }
-    else if (light.lightState === "go") {
-      light.lightState = "stop";
+    else if (light.lightState === "green") {
+      light.lightState = "red";
       light.setFrames(0, 0, 0);
     }
 }
